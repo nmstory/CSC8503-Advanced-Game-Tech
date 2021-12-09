@@ -1,6 +1,7 @@
 #pragma once
 #include "GameTechRenderer.h"
 #include "../CSC8503Common/PhysicsSystem.h"
+#include "../CSC8503Common/StateGameObject.h"
 
 namespace NCL {
 	namespace CSC8503 {
@@ -22,6 +23,8 @@ namespace NCL {
 			void InitWorldSprings();
 			void InitWorldConstraints();
 			void InitWorldCollisions();
+			void InitWorldFSM();
+			void InitWorldCoursework();
 
 			void InitGameExamples();
 
@@ -36,7 +39,7 @@ namespace NCL {
 			void DebugObjectMovement();
 			void LockedObjectMovement();
 
-			GameObject* AddFloorToWorld(const Vector3& position);
+			GameObject* AddFloorToWorld(const Vector3& position, float xRotation);
 			GameObject* AddSphereToWorld(const Vector3& position, float radius, float inverseMass = 10.0f);
 			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
 			
@@ -77,6 +80,11 @@ namespace NCL {
 				lockedObject = o;
 			}
 
+			// FSM State Object functionality
+			StateGameObject* AddStateObjectToWorld(const Vector3& position);
+			StateGameObject* testStateObject;
+		private:
+			GameObject* floor;
 		};
 	}
 }

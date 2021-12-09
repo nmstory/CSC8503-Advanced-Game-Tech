@@ -21,6 +21,8 @@ TutorialGame::TutorialGame()	{
 	Debug::SetRenderer(renderer);
 
 	InitialiseAssets();
+
+	testStateObject = nullptr;
 }
 
 /*
@@ -49,7 +51,7 @@ void TutorialGame::InitialiseAssets() {
 	basicShader = new OGLShader("GameTechVert.glsl", "GameTechFrag.glsl");
 
 	InitCamera();
-	InitWorldCollisions();
+	InitWorldCoursework();
 }
 
 TutorialGame::~TutorialGame()	{
@@ -66,6 +68,8 @@ TutorialGame::~TutorialGame()	{
 	delete physics;
 	delete renderer;
 	delete world;
+
+	delete testStateObject;
 }
 
 void TutorialGame::UpdateGame(float dt) {
@@ -106,6 +110,19 @@ void TutorialGame::UpdateGame(float dt) {
 
 	world->UpdateWorld(dt);
 	renderer->Update(dt);
+
+	// FSM Update
+	if (testStateObject) {
+		testStateObject->Update(dt);
+	}
+
+	if (floor) {
+		if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::UP)) {
+			// update floor orientation? or apply a force?
+			//floor->GetTransform().SetOrientation(floor->GetTransform().GetOrientation() + Quaternion::AxisAngleToQuaterion(Vector3(0, 0, 1), 1));
+			floor->GetPhysicsObject()->ApplyLinearImpulse(Vector3(0, 100, 0));
+		}
+	}
 
 	Debug::FlushRenderables(dt);
 	renderer->Render();
@@ -279,7 +296,26 @@ void TutorialGame::InitWorldCollisions() {
 	// Placing testing capsule
 	AddCapsuleToWorld(Vector3(0.0f, 10.0f, 0.0f), 4, 2);
 	AddCubeToWorld(Vector3(10.0f, 10.0f, 0.0f), Vector3(2, 2, 2));
-	AddSphereToWorld(Vector3(20.0f, 10.0f, 0.0f), 2, 0.5);
+	AddSphereToWorld(Vector3(20.0f, 50.0f, 20.0f), 2, 2);
+
+
+	/**		SECOND FLOOR	**/
+	AddFloorToWorld(Vector3(0, 0, 0), -20);
+}
+
+void TutorialGame::InitWorldFSM() {
+	world->ClearAndErase();
+	physics->Clear();
+
+	testStateObject = AddStateObjectToWorld(Vector3(0, 10, 0));
+}
+
+void TutorialGame::InitWorldCoursework() {
+	world->ClearAndErase();
+	physics->Clear();
+
+	InitDefaultFloor();
+	AddSphereToWorld(Vector3(0.0f, 30.0f, 00.0f), 2, 2);
 }
 
 void TutorialGame::BridgeConstraintTest() {
@@ -312,24 +348,28 @@ void TutorialGame::BridgeConstraintTest() {
 A single function to add a large immoveable cube to the bottom of our world
 
 */
-GameObject* TutorialGame::AddFloorToWorld(const Vector3& position) {
-	GameObject* floor = new GameObject();
+GameObject* TutorialGame::AddFloorToWorld(const Vector3& position, float xRotation) {
+	floor = new GameObject();
 
 	Vector3 floorSize	= Vector3(100, 2, 100);
 	OBBVolume* volume	= new OBBVolume(floorSize);
+	//AABBVolume* volume	= new AABBVolume(floorSize);
 	floor->SetBoundingVolume((CollisionVolume*)volume);
 	floor->GetTransform()
 		.SetScale(floorSize * 2)
 		.SetPosition(position)
-		.SetOrientation(Quaternion::AxisAngleToQuaterion(Vector3(1,0,0), 20));
+		.SetOrientation(Quaternion::AxisAngleToQuaterion(Vector3(1,0,0), xRotation));
 
 	floor->SetRenderObject(new RenderObject(&floor->GetTransform(), cubeMesh, basicTex, basicShader));
 	floor->SetPhysicsObject(new PhysicsObject(&floor->GetTransform(), floor->GetBoundingVolume()));
 
-	floor->GetPhysicsObject()->SetInverseMass(0);
+	floor->GetPhysicsObject()->SetInverseMass(0.25);
 	floor->GetPhysicsObject()->InitCubeInertia();
 
 	world->AddGameObject(floor);
+
+	PistonConstraint* pc = new PistonConstraint(floor, Vector3(0, 1, 0));
+	world->AddConstraint(pc);
 
 	return floor;
 }
@@ -415,7 +455,7 @@ void TutorialGame::InitSphereGridWorld(int numRows, int numCols, float rowSpacin
 			AddSphereToWorld(position, radius, 1.0f);
 		}
 	}
-	AddFloorToWorld(Vector3(0, -2, 0));
+	AddFloorToWorld(Vector3(0, -2, 0), 0);
 }
 
 void TutorialGame::InitMixedGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing) {
@@ -446,7 +486,7 @@ void TutorialGame::InitCubeGridWorld(int numRows, int numCols, float rowSpacing,
 }
 
 void TutorialGame::InitDefaultFloor() {
-	AddFloorToWorld(Vector3(0, -2, 0));
+	AddFloorToWorld(Vector3(0, -2, 0), 0);
 }
 
 void TutorialGame::InitGameExamples() {
@@ -654,4 +694,24 @@ void TutorialGame::MoveSelectedObject() {
 	if (Window::GetKeyboard()->KeyPressed(NCL::KeyboardKeys::A)) {
 		selectionObject->GetPhysicsObject()->AddForce(Vector3(-1,0,0) * forceMagnitude);
 	}
+}
+
+StateGameObject* TutorialGame::AddStateObjectToWorld(const Vector3& position) {
+	StateGameObject* apple = new StateGameObject();
+
+	SphereVolume* volume = new SphereVolume(0.25f);
+	apple->SetBoundingVolume((CollisionVolume*)volume);
+	apple->GetTransform()
+		.SetScale(Vector3(0.25, 0.25, 0.25))
+		.SetPosition(position);
+
+	apple->SetRenderObject(new RenderObject(&apple->GetTransform(), bonusMesh, nullptr, basicShader));
+	apple->SetPhysicsObject(new PhysicsObject(&apple->GetTransform(), apple->GetBoundingVolume()));
+
+	apple->GetPhysicsObject()->SetInverseMass(1.0f);
+	apple->GetPhysicsObject()->InitSphereInertia();
+
+	world->AddGameObject(apple);
+
+	return apple;
 }

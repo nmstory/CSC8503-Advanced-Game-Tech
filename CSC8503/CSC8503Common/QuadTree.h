@@ -82,7 +82,7 @@ namespace NCL {
 			}
 
 			void Clear() {
-				delete children;
+				//delete children;
 			}
 
 			void DebugDraw() {

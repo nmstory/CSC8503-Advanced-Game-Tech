@@ -297,7 +297,7 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 	
 	//friction
 	Vector3 t = contactVelocity - (p.normal * (Vector3::Dot(contactVelocity, p.normal)));
-	float totalFriction = physA->GetFriction() + physB->GetFriction();
+	float totalFriction = (physA->GetFriction() + physB->GetFriction())/200;
 	angularEffect = Vector3::Dot(inertiaA + inertiaB, t);
 
 	float Jt = -(totalFriction * Vector3::Dot(contactVelocity, t)) / (totalMass + angularEffect);
@@ -310,6 +310,7 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 	physA->ApplyAngularImpulse(Vector3::Cross(relativeA, -fullImpulse));
 	physB->ApplyAngularImpulse(Vector3::Cross(relativeB, fullImpulse));
 
+	
 	Vector3 frictionImpulse = t * Jt;
 
 	physA->ApplyLinearImpulse(-frictionImpulse);
@@ -317,8 +318,6 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 
 	physA->ApplyAngularImpulse(Vector3::Cross(relativeA, -frictionImpulse));
 	physB->ApplyAngularImpulse(Vector3::Cross(relativeB, frictionImpulse));
-
-	std::cout << Jt << std::endl;
 }
 
 // Tutorial 5 Q.2
@@ -363,7 +362,9 @@ void PhysicsSystem::BroadPhase() {
 
 	// Constructing a Quadtree with some default parameters, then iterating through all of the objects in the game world and inserting them into the tree
 	broadphaseCollisions.clear();
-	tree->Clear();
+	//tree->Clear();
+	delete tree;
+	tree = new NCL::CSC8503::QuadTree<GameObject*>(Vector2(1024.0f, 1024.0f), 7, 6);
 	//NCL::CSC8503::QuadTree <GameObject*> tree(Vector2(1024, 1024), 7, 6);
 
 	

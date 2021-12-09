@@ -39,3 +39,45 @@ namespace NCL {
 		};
 	}
 }
+
+namespace NCL {
+	namespace CSC8503 {
+		class GameObject;
+		
+		// An implementation of a constraint
+		class PistonConstraint : public Constraint {
+			public:
+				PistonConstraint(GameObject* p, Vector3 moveConstraint) {
+					this->piston = p;
+					this->restingPosition = p->GetTransform().GetPosition();
+					if (moveConstraint.x > 0) {
+						allowMoveX = true;
+					}
+					else {
+						allowMoveX = false;
+					}
+					
+					if (moveConstraint.y > 0) {
+						allowMoveY = true;
+					}
+					else {
+						allowMoveY = false;
+					}
+					
+					if (moveConstraint.z > 0) {
+						allowMoveZ = true;
+					}
+					else {
+						allowMoveZ = false;
+					}					
+				}
+				~PistonConstraint() {}
+				
+				void UpdateConstraint(float dt) override;
+			protected:
+				GameObject* piston;
+				Vector3 restingPosition;
+				bool allowMoveX, allowMoveY, allowMoveZ;
+		};
+	}
+}
