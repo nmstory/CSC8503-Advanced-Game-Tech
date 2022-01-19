@@ -37,7 +37,7 @@ namespace NCL {
 		protected:
 			void BasicCollisionDetection(float dt);
 			void BroadPhase();
-			void NarrowPhase();
+			void NarrowPhase(float dt);
 
 			void ClearForces();
 
@@ -60,7 +60,7 @@ namespace NCL {
 			float	globalDamping;
 			float	linearDamping = 0.4f; // Tutorial 2 Q.2.
 
-			std::set<CollisionDetection::CollisionInfo> allCollisions; // used??
+			std::set<CollisionDetection::CollisionInfo> allCollisions;
 			std::set<CollisionDetection::CollisionInfo> broadphaseCollisions;
 
 			// new
@@ -75,4 +75,3 @@ namespace NCL {
 		};
 	}
 }
-

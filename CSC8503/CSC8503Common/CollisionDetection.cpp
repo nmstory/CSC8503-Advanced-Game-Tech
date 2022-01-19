@@ -248,8 +248,6 @@ Ray CollisionDetection::BuildRayFromMouse(const Camera& cam) {
 
 	c.Normalise();
 
-	//std::cout << "Ray Direction:" << c << std::endl;
-
 	return Ray(cam.GetPosition(), c);
 }
 
@@ -566,12 +564,6 @@ bool CollisionDetection::CapsuleIntersection(	const CapsuleVolume& volumeA, cons
 		bestA = capsuleTopA;
 	}
 
-
-
-
-
-
-
 	return false;
 }
 
@@ -625,8 +617,6 @@ bool CollisionDetection::OBBIntersection(
 	const OBBVolume& volumeA, const Transform& worldTransformA,
 	const OBBVolume& volumeB, const Transform& worldTransformB, CollisionInfo& collisionInfo) {
 
-
-
 	return false;
 }
 
@@ -648,18 +638,15 @@ bool CollisionDetection::OBBSphereIntersection(
 	AABBVolume aabb(volumeA.GetHalfDimensions());
 	Transform aabbTransform;
 	aabbTransform.SetPosition(localPosRelative);
-	//aabbTransform.SetOrientation(x);
 	aabbTransform.SetScale(worldTransformA.GetScale());
 
 	Vector3 boxSize = aabb.GetHalfDimensions();
 
-	//Vector3 delta = worldTransformB.GetPosition() - aabbTransform.GetPosition();
 	Vector3 closestPointOnBox = Maths::Clamp(localPosRelative, -boxSize, boxSize);
 
-	//Vector3 localPoint = (inverseOBBOrientation * delta) - closestPointOnBox;
 	float distance = (closestPointOnBox - localPosRelative).Length();
 
-	if (distance < volumeB.GetRadius()) {// yes , we ’re colliding !
+	if (distance < volumeB.GetRadius()) {// we're colliding
 		Vector3 collisionNormal = worldTransformA.GetOrientation() * -(closestPointOnBox - localPosRelative).Normalised();
 		float penetration = (volumeB.GetRadius() - distance);
 

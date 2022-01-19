@@ -61,7 +61,6 @@ namespace NCL {
 		static bool AABBCapsuleIntersection(	const AABBVolume& volumeA, const Transform& worldTransformA,
 												const CapsuleVolume& volumeB, const Transform& worldTransformB, CollisionInfo& collisionInfo);
 
-		//TODO ADD THIS PROPERLY
 		static bool RayBoxIntersection(const Ray&r, const Vector3& boxPos, const Vector3& boxSize, RayCollision& collision);
 
 		static Ray BuildRayFromMouse(const Camera& c);
@@ -110,10 +109,6 @@ namespace NCL {
 		static Matrix4		GenerateInverseProjection(float aspect, float fov, float nearPlane, float farPlane);
 		static Matrix4		GenerateInverseView(const Camera &c);
 
-
-
-	protected:
-	
 	private:
 		CollisionDetection()	{}
 		~CollisionDetection()	{}

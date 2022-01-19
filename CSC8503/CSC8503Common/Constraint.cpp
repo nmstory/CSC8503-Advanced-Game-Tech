@@ -1,4 +1,6 @@
 #include "Constraint.h"
+#include "../../Common/Maths.h"
+#include "../../Common/Window.h"
 
 void NCL::CSC8503::PositionConstraint::UpdateConstraint(float dt) {
 	Vector3 relativePos = objectA->GetTransform().GetPosition() - objectB->GetTransform().GetPosition();
@@ -36,16 +38,72 @@ void NCL::CSC8503::PositionConstraint::UpdateConstraint(float dt) {
 
 void NCL::CSC8503::PistonConstraint::UpdateConstraint(float dt) {
 
-	Vector3 relativePos = piston->GetTransform().GetPosition() - restingPosition;
-	//Vector3 relativePos = restingPosition- piston->GetTransform().GetPosition();
+	// P Key to push pistons
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::P) && pistonDirection == PistonDirection::Resting) {
+		Vector3 impulse = moveConstraint * 400.0f;
+		piston->GetPhysicsObject()->ApplyLinearImpulse(impulse);
+		pistonDirection = PistonDirection::Contracting;
+	}
+
+	Vector3 limitConstraint;
+	if (pistonDirection == PistonDirection::Contracting) {
+
+		limitConstraint = Vector3(moveConstraint.x, moveConstraint.y, moveConstraint.z);
+	}
+	if (pistonDirection == PistonDirection::Retracting) {
+
+		limitConstraint = Vector3(-moveConstraint.x, -moveConstraint.y, -moveConstraint.z);
+	}
+	
+	Vector3 distanceTravelled = piston->GetTransform().GetPosition() - restingPosition;
+	float d = abs(distanceTravelled.Length());
+	
+	if (d > 50 && pistonDirection == PistonDirection::Contracting) {
+		pistonDirection = PistonDirection::Retracting;
+	}
+	else if (d < 5 && pistonDirection == PistonDirection::Retracting) {
+		pistonDirection = PistonDirection::Resting;
+		piston->GetTransform().SetPosition(restingPosition);
+	}
+
+	if (pistonDirection == PistonDirection::Contracting) {
+		Vector3 currentPos = piston->GetTransform().GetPosition();
+		piston->GetTransform().SetPosition(Vector3(currentPos.x, restingPosition.y, currentPos.z));
+	}
+	else if (pistonDirection == PistonDirection::Retracting) {
+		piston->GetPhysicsObject()->ApplyLinearImpulse(-moveConstraint);
+		Vector3 currentPos = piston->GetTransform().GetPosition();
+		piston->GetTransform().SetPosition(Vector3(currentPos.x, restingPosition.y, currentPos.z));
+	}
+	else if (pistonDirection == PistonDirection::Resting) {
+		piston->GetPhysicsObject()->SetLinearVelocity(Vector3(0.0f, 0.0f, 0.0f));
+	}
+}
+
+void NCL::CSC8503::BalancingPlaneConstraint::UpdateConstraint(float dt) {
+
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::UP)) {
+		pushOrientation->x = 3.0f;
+	}	
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::DOWN)) {
+		pushOrientation->x = -3.0f;
+	}
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::LEFT)) {
+		pushOrientation->z = -3.0f;
+	}
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::RIGHT)) {
+		pushOrientation->z = 3.0f;
+	}
+
+	Vector3 relativePos = balancingPlane->GetTransform().GetPosition() - restingPosition;
 	float currentDistance = relativePos.Length();
 	//			MAX DISTANCE - currentDistance
-	float offset = 30 - currentDistance;
+	float offset = 30.0f - currentDistance;
 
 	if (abs(offset) > 0.0f) {
 		Vector3 offsetDir = relativePos.Normalised();
 
-		PhysicsObject* phys = piston->GetPhysicsObject();
+		PhysicsObject* phys = balancingPlane->GetPhysicsObject();
 		Vector3 velocity = phys->GetLinearVelocity();
 		float constraintMass = phys->GetInverseMass();
 
@@ -60,20 +118,10 @@ void NCL::CSC8503::PistonConstraint::UpdateConstraint(float dt) {
 
 			Vector3 impulse = offsetDir * lambda;
 
-			phys->ApplyLinearImpulse((impulse)/500);
+			phys->ApplyLinearImpulse((impulse)/500.0f);
+			phys->ApplyAngularImpulse(*pushOrientation);
 		}
 	}
 
-
-
-
-
-
-	/*
-	Vector3 pistonPosition = piston->GetTransform().GetPosition();
-
-	if (allowMoveY && pistonPosition.y < restingPosition.y) {
-		piston->GetTransform().SetPosition(Vector3(pistonPosition.x, restingPoint.y, pistonPosition.z));
-	}
-	*/
+	*pushOrientation = Vector3(0.0f, 0.0f, 0.0f);
 }

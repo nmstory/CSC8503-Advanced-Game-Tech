@@ -7,7 +7,6 @@ public:
 	~BehaviourSequence() {}
 	
 	BehaviourState Execute(float dt) override {
-		// std :: cout << " Executing sequence " << name << "\ n ";
 		for (auto& i : childNodes) {
 			BehaviourState nodeState = i->Execute(dt);
 			switch (nodeState) {

@@ -77,11 +77,14 @@ NavigationGrid::~NavigationGrid()	{
 
 bool NavigationGrid::FindPath(const Vector3& from, const Vector3& to, NavigationPath& outPath) {
 	//need to work out which node 'from' sits in, and 'to' sits in
-	int fromX = ((int)from.x / nodeSize);
-	int fromZ = ((int)from.z / nodeSize);
+	int fromX = ((int)(from.x + offset) / nodeSize);
+	int fromZ = ((int)(from.z + offset) / nodeSize);
 
-	int toX = ((int)to.x / nodeSize);
-	int toZ = ((int)to.z / nodeSize);
+	int toX = ((int)(to.x  + offset ) / nodeSize);
+	int toZ = ((int)(to.z + offset) / nodeSize);
+
+	//std::cout << "from in nodeSize: {" << fromX << ", " << fromZ << "}, from in world space: {" << (fromX * nodeSize) << ", " << (fromZ * nodeSize) << "}." << std::endl;
+	//std::cout << "to in nodeSize: {" << toX << ", " << toZ << "}, to in world space: {" << (toX * nodeSize) << ", " << (toZ * nodeSize) << "}." << std::endl;
 
 	if (fromX < 0 || fromX > gridWidth - 1 ||
 		fromZ < 0 || fromZ > gridHeight - 1) {
@@ -113,7 +116,8 @@ bool NavigationGrid::FindPath(const Vector3& from, const Vector3& to, Navigation
 		if (currentBestNode == endNode) {			//we've found the path!
 			GridNode* node = endNode;
 			while (node != nullptr) {
-				outPath.PushWaypoint(node->position);
+				//outPath.PushWaypoint(node->position);
+				outPath.PushWaypoint(Vector3(node->position.x - offset, node->position.y, node->position.z - offset));
 				node = node->parent;
 			}
 			return true;
@@ -148,6 +152,28 @@ bool NavigationGrid::FindPath(const Vector3& from, const Vector3& to, Navigation
 		}
 	}
 	return false; //open list emptied out with no path!
+}
+
+void NavigationGrid::DrawMap(GameTechRenderer* r) {
+	for (int i = 0; i < (gridHeight * gridWidth) - gridWidth; ++i) {
+		//r->DrawLine(allNodes[i].position, allNodes[i + 1].position, Vector4(0, 1, 0, 1));
+		if (((i + 1 )% gridWidth) != 0) {
+			r->DrawLine(Vector3(allNodes[i].position.x - offset,
+								allNodes[i].position.y + 30,
+								allNodes[i].position.z - offset), 
+						Vector3(allNodes[i + 1].position.x - offset,
+							allNodes[i + 1].position.y + 30, 
+							allNodes[i + 1].position.z - offset), Vector4(0, 1, 0, 1));
+
+			r->DrawLine(Vector3(allNodes[i].position.x - offset,
+								allNodes[i].position.y + 30,
+								allNodes[i].position.z - offset),
+							Vector3(allNodes[i + gridWidth].position.x - offset,
+								allNodes[i + gridWidth].position.y + 30,
+								allNodes[i + gridWidth].position.z - offset), Vector4(0, 1, 0, 1));
+
+		}
+	}
 }
 
 bool NavigationGrid::NodeInList(GridNode* n, std::vector<GridNode*>& list) const {

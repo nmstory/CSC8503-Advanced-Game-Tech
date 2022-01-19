@@ -11,6 +11,7 @@ PhysicsObject::PhysicsObject(Transform* parentTransform, const CollisionVolume* 
 	inverseMass = 1.0f;
 	elasticity	= 0.8f;
 	friction	= 0.8f;
+	collisionType = CollisionType::Impulse; // an impulse collision by default
 }
 
 PhysicsObject::~PhysicsObject()	{

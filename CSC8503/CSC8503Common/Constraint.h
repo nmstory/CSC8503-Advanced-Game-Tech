@@ -43,13 +43,66 @@ namespace NCL {
 namespace NCL {
 	namespace CSC8503 {
 		class GameObject;
-		
-		// An implementation of a constraint
+
+		enum class PistonDirection {
+			Contracting,
+			Retracting,
+			Resting
+		};
+
 		class PistonConstraint : public Constraint {
 			public:
 				PistonConstraint(GameObject* p, Vector3 moveConstraint) {
 					this->piston = p;
 					this->restingPosition = p->GetTransform().GetPosition();
+					this->pushOrientation = new Vector3(0.0f, 0.0f, 0.0f);
+					this->pistonDirection = PistonDirection::Resting;
+					if (moveConstraint.x > 0) {
+						allowMoveX = true;
+					}
+					else {
+						allowMoveX = false;
+					}
+					
+					if (moveConstraint.y > 0) {
+						allowMoveY = true;
+					}
+					else {
+						allowMoveY = false;
+					}
+					
+					if (moveConstraint.z > 0) {
+						allowMoveZ = true;
+					}
+					else {
+						allowMoveZ = false;
+					}
+					this->moveConstraint = moveConstraint;
+				}
+				~PistonConstraint() {}
+				
+				void UpdateConstraint(float dt) override;
+			protected:
+				PistonDirection pistonDirection;
+				Vector3 moveConstraint;
+				GameObject* piston;
+				Vector3 restingPosition;
+				Vector3* pushOrientation;
+				bool allowMoveX, allowMoveY, allowMoveZ;
+		};
+	}
+}
+
+namespace NCL {
+	namespace CSC8503 {
+		class GameObject;
+
+		class BalancingPlaneConstraint : public Constraint {
+			public:
+				BalancingPlaneConstraint(GameObject* p, Vector3 moveConstraint) {
+					this->balancingPlane = p;
+					this->restingPosition = p->GetTransform().GetPosition();
+					this->pushOrientation = new Vector3(0.0f, 0.0f, 0.0f);
 					if (moveConstraint.x > 0) {
 						allowMoveX = true;
 					}
@@ -71,12 +124,13 @@ namespace NCL {
 						allowMoveZ = false;
 					}					
 				}
-				~PistonConstraint() {}
+				~BalancingPlaneConstraint() {}
 				
 				void UpdateConstraint(float dt) override;
 			protected:
-				GameObject* piston;
+				GameObject* balancingPlane;
 				Vector3 restingPosition;
+				Vector3* pushOrientation;
 				bool allowMoveX, allowMoveY, allowMoveZ;
 		};
 	}

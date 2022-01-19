@@ -74,12 +74,15 @@ OGLRenderer::OGLRenderer(Window& w) : RendererBase(w)	{
 	debugTextMesh		= new OGLMesh();
 
 
-	debugLinesMesh->SetVertexPositions(std::vector<Vector3>(5000, Vector3()));
-	debugLinesMesh->SetVertexColours(std::vector<Vector4>(5000, Vector3()));
+	//int numberOfLinesVerts = 5000;
+	int numberOfLinesVerts = 5000;
 
-	debugTextMesh->SetVertexPositions(std::vector<Vector3>(5000, Vector3()));
-	debugTextMesh->SetVertexColours(std::vector<Vector4>(5000, Vector3()));
-	debugTextMesh->SetVertexTextureCoords(std::vector<Vector2>(5000, Vector3()));
+	debugLinesMesh->SetVertexPositions(std::vector<Vector3>(numberOfLinesVerts, Vector3()));
+	debugLinesMesh->SetVertexColours(std::vector<Vector4>(numberOfLinesVerts, Vector3()));
+
+	debugTextMesh->SetVertexPositions(std::vector<Vector3>(numberOfLinesVerts, Vector3()));
+	debugTextMesh->SetVertexColours(std::vector<Vector4>(numberOfLinesVerts, Vector3()));
+	debugTextMesh->SetVertexTextureCoords(std::vector<Vector2>(numberOfLinesVerts, Vector3()));
 
 	debugTextMesh->UploadToGPU();
 	debugLinesMesh->UploadToGPU();

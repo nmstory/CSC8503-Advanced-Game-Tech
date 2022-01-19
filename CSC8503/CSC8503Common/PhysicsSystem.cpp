@@ -96,7 +96,7 @@ void PhysicsSystem::Update(float dt) {
 		IntegrateAccel(realDT); //Update accelerations from external forces
 		if (useBroadPhase) {
 			BroadPhase();
-			NarrowPhase();
+			NarrowPhase(dt);
 		}
 		else {
 			BasicCollisionDetection(dt);
@@ -172,11 +172,6 @@ void PhysicsSystem::UpdateCollisionList() {
 }
 
 void PhysicsSystem::UpdateObjectAABBs() {
-	/*gameWorld.OperateOnContents(
-		[](GameObject* g) {
-			g->UpdateBroadphaseAABB();
-		}
-	);*/
 	std::vector <GameObject*>::const_iterator first;
 	std::vector <GameObject*>::const_iterator last;
 	gameWorld.GetObjectIterators(first, last);
@@ -199,9 +194,6 @@ std::set<CollisionDetection::CollisionInfo>* PhysicsSystem::PotentialCollisionsF
 		}
 	);
 	
-
-
-
 	return potentialCollisionsToRay;
 }
 
@@ -231,11 +223,6 @@ void PhysicsSystem::BasicCollisionDetection(float dt) {
 
 			CollisionDetection::CollisionInfo info;
 			if (CollisionDetection::ObjectIntersection(*i, *j, info)) {
-				/*
-				std::cout << " Collision between " << (*i)->GetName() << " and " << (*j)->GetName() << std::endl;
-				info.framesLeft = numCollisionFrames;
-				allCollisions.insert(info);*/
-
 				ImpulseResolveCollision(*info.a, *info.b, info.point);
 				//ResolveSpringCollision(*info.a, *info.b, info.point, dt);
 				info.framesLeft = numCollisionFrames;
@@ -247,7 +234,6 @@ void PhysicsSystem::BasicCollisionDetection(float dt) {
 }
 
 /*
-
 	No need for considering the collision volume type, as any collision boils down to:
 		* collision normal
 		* penetration distance
@@ -295,29 +281,28 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 	// Impulse value, J, in order to consider the conservation of momentum
 	float j = (-(1.0f + cRestitution) * impulseForce) / (totalMass + angularEffect);
 	
-	//friction
-	Vector3 t = contactVelocity - (p.normal * (Vector3::Dot(contactVelocity, p.normal)));
-	float totalFriction = (physA->GetFriction() + physB->GetFriction())/200;
+	// Friction
+	Vector3 t = (contactVelocity - (p.normal * (Vector3::Dot(contactVelocity, p.normal)))).Normalised();
+	float totalFriction = (physA->GetFriction() + physB->GetFriction())/10;
 	angularEffect = Vector3::Dot(inertiaA + inertiaB, t);
 
 	float Jt = -(totalFriction * Vector3::Dot(contactVelocity, t)) / (totalMass + angularEffect);
 	
 	Vector3 fullImpulse = p.normal * j;
 
-	physA->ApplyLinearImpulse(-fullImpulse);
-	physB->ApplyLinearImpulse(fullImpulse);
+	if (a.GetName() != "Piston Platform")physA->ApplyLinearImpulse(-fullImpulse);
+	if (b.GetName() != "Piston Platform")physB->ApplyLinearImpulse(fullImpulse);
 	
-	physA->ApplyAngularImpulse(Vector3::Cross(relativeA, -fullImpulse));
-	physB->ApplyAngularImpulse(Vector3::Cross(relativeB, fullImpulse));
-
+	if(a.GetName() != "Piston Platform") physA->ApplyAngularImpulse(Vector3::Cross(relativeA, -fullImpulse));
+	if(b.GetName() != "Piston Platform") physB->ApplyAngularImpulse(Vector3::Cross(relativeB, fullImpulse));
 	
 	Vector3 frictionImpulse = t * Jt;
+	
+	if (a.GetName() != "Piston Platform") physA->ApplyLinearImpulse(-frictionImpulse);
+	if (b.GetName() != "Piston Platform") physB->ApplyLinearImpulse(frictionImpulse);
 
-	physA->ApplyLinearImpulse(-frictionImpulse);
-	physB->ApplyLinearImpulse(frictionImpulse);
-
-	physA->ApplyAngularImpulse(Vector3::Cross(relativeA, -frictionImpulse));
-	physB->ApplyAngularImpulse(Vector3::Cross(relativeB, frictionImpulse));
+	if (a.GetName() != "Piston Platform") physA->ApplyAngularImpulse(Vector3::Cross(relativeA, -frictionImpulse));
+	if (b.GetName() != "Piston Platform") physB->ApplyAngularImpulse(Vector3::Cross(relativeB, frictionImpulse));
 }
 
 // Tutorial 5 Q.2
@@ -362,11 +347,8 @@ void PhysicsSystem::BroadPhase() {
 
 	// Constructing a Quadtree with some default parameters, then iterating through all of the objects in the game world and inserting them into the tree
 	broadphaseCollisions.clear();
-	//tree->Clear();
 	delete tree;
 	tree = new NCL::CSC8503::QuadTree<GameObject*>(Vector2(1024.0f, 1024.0f), 7, 6);
-	//NCL::CSC8503::QuadTree <GameObject*> tree(Vector2(1024, 1024), 7, 6);
-
 	
 	std::vector <GameObject*>::const_iterator first;
 	std::vector <GameObject*>::const_iterator last;
@@ -401,14 +383,19 @@ void PhysicsSystem::BroadPhase() {
 The broadphase will now only give us likely collisions, so we can now go through them,
 and work out if they are truly colliding, and if so, add them into the main collision list
 */
-void PhysicsSystem::NarrowPhase() {
-	for (std::set < CollisionDetection::CollisionInfo >::iterator
+void PhysicsSystem::NarrowPhase(float dt) {
+	for (std::set <CollisionDetection::CollisionInfo>::iterator
 		i = broadphaseCollisions.begin();
 		i != broadphaseCollisions.end(); ++i) {
 		CollisionDetection::CollisionInfo info = *i;
 		if (CollisionDetection::ObjectIntersection(info.a, info.b, info)) {
 			info.framesLeft = numCollisionFrames;
-			ImpulseResolveCollision(*info.a, *info.b, info.point);
+			if (info.a->GetPhysicsObject()->GetCollisionType() == CollisionType::Spring || info.b->GetPhysicsObject()->GetCollisionType() == CollisionType::Spring) {
+				ResolveSpringCollision(*info.a, *info.b, info.point, dt);
+			}
+			else {
+				ImpulseResolveCollision(*info.a, *info.b, info.point);
+			}
 			allCollisions.insert(info); // insert into our main set
 		}
 	}

@@ -51,9 +51,6 @@
     <ClInclude Include="StateMachine.h">
       <Filter>AI</Filter>
     </ClInclude>
-    <ClInclude Include="StateTransition.h">
-      <Filter>AI</Filter>
-    </ClInclude>
     <ClInclude Include="State.h">
       <Filter>AI</Filter>
     </ClInclude>
@@ -143,9 +140,6 @@
     <ClCompile Include="StateMachine.cpp">
       <Filter>AI</Filter>
     </ClCompile>
-    <ClCompile Include="StateTransition.cpp">
-      <Filter>AI</Filter>
-    </ClCompile>
     <ClCompile Include="PushdownState.cpp">
       <Filter>AI</Filter>
     </ClCompile>
@@ -163,12 +157,6 @@
     </ClCompile>
     <ClCompile Include="NavigationMesh.cpp">
       <Filter>Pathfinding</Filter>
-    </ClCompile>
-    <ClCompile Include="QuadTree.cpp">
-      <Filter>CollisionDetection</Filter>
-    </ClCompile>
-    <ClCompile Include="CapsuleVolume.cpp">
-      <Filter>CollisionDetection</Filter>
     </ClCompile>
     <ClCompile Include="Constraint.cpp">
       <Filter>Physics</Filter>

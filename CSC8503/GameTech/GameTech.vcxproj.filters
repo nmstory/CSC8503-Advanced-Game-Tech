@@ -21,7 +21,7 @@
     <ClCompile Include="GameTechRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TutorialGame.cpp">
+    <ClCompile Include="CourseworkGame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -29,7 +29,7 @@
     <ClInclude Include="GameTechRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TutorialGame.h">
+    <ClInclude Include="CourseworkGame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
