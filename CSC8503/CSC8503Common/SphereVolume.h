@@ -18,4 +18,3 @@ namespace NCL {
 		float	radius;
 	};
 }
-

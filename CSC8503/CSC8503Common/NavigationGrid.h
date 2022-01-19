@@ -1,6 +1,8 @@
 #pragma once
 #include "NavigationMap.h"
 #include <string>
+
+#include "../GameTech/GameTechRenderer.h" 
 namespace NCL {
 	namespace CSC8503 {
 		struct GridNode {
@@ -36,6 +38,7 @@ namespace NCL {
 			~NavigationGrid();
 
 			bool FindPath(const Vector3& from, const Vector3& to, NavigationPath& outPath) override;
+			void DrawMap(GameTechRenderer* r);
 				
 		protected:
 			bool		NodeInList(GridNode* n, std::vector<GridNode*>& list) const;
@@ -44,9 +47,9 @@ namespace NCL {
 			int nodeSize;
 			int gridWidth;
 			int gridHeight;
+			int offset = 200;
 
 			GridNode* allNodes;
 		};
 	}
 }
-

@@ -80,8 +80,6 @@ bool GameWorld::Raycast(Ray& r, RayCollision& closestCollision, bool closestObje
 	// Set means no duplicate objects - where an object could be in multiple quad tree elements
 	//std::set<CollisionDetection::CollisionInfo>* potentialCollisions = PhysicsSystem::PotentialCollisionsFromRay(r);
 	
-
-	
 	for (auto& i : gameObjects) {
 		if (!i->GetBoundingVolume()) { //objects might not be collideable etc...
 			continue;

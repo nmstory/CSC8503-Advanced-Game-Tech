@@ -26,4 +26,3 @@ namespace NCL {
         float halfHeight;
     };
 }
-

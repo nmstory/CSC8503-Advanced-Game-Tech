@@ -1,30 +1,12 @@
+#pragma once
 #include "../../Common/Window.h"
-
-#include "../CSC8503Common/StateMachine.h"
-#include "../CSC8503Common/StateTransition.h"
-#include "../CSC8503Common/State.h"
-
-#include "../CSC8503Common/NavigationGrid.h"
-
-#include "TutorialGame.h"
+#include "CourseworkGame.h"
 
 using namespace NCL;
 using namespace CSC8503;
 
-/*
-
-The main function should look pretty familar to you!
-We make a window, and then go into a while loop that repeatedly
-runs our 'game' until we press escape. Instead of making a 'renderer'
-and updating it, we instead make a whole game, and repeatedly update that,
-instead. 
-
-This time, we've added some extra functionality to the window class - we can
-hide or show the 
-
-*/
 int main() {
-	Window*w = Window::CreateGameWindow("CSC8503 Game technology!", 1280, 720);
+	Window* w = Window::CreateGameWindow("CSC8503 Coursework", 1280, 720);
 
 	if (!w->HasInitialised()) {
 		return -1;
@@ -33,9 +15,9 @@ int main() {
 	w->ShowOSPointer(false);
 	w->LockMouseToWindow(true);
 
-	TutorialGame* g = new TutorialGame();
-	w->GetTimer()->GetTimeDeltaSeconds(); //Clear the timer so we don't get a larget first dt!
-	while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {
+	CourseworkGame* g = new CourseworkGame(w);
+	w->GetTimer()->GetTimeDeltaSeconds(); //Clear the timer
+	while (w->UpdateWindow()) {
 		float dt = w->GetTimer()->GetTimeDeltaSeconds();
 		if (dt > 0.1f) {
 			std::cout << "Skipping large time delta" << std::endl;
