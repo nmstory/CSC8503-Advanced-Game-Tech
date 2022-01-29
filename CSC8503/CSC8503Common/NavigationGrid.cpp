@@ -40,21 +40,21 @@ NavigationGrid::NavigationGrid(const std::string&filename) : NavigationGrid() {
 		}
 	}
 	
-	//now to build the connectivity between the nodes
+	// Now to build the connectivity between the nodes
 	for (int y = 0; y < gridHeight; ++y) {
 		for (int x = 0; x < gridWidth; ++x) {
 			GridNode&n = allNodes[(gridWidth * y) + x];		
 
-			if (y > 0) { //get the above node
+			if (y > 0) { // Get the above node
 				n.connected[0] = &allNodes[(gridWidth * (y - 1)) + x];
 			}
-			if (y < gridHeight - 1) { //get the below node
+			if (y < gridHeight - 1) { // Get the below node
 				n.connected[1] = &allNodes[(gridWidth * (y + 1)) + x];
 			}
-			if (x > 0) { //get left node
+			if (x > 0) { // Get left node
 				n.connected[2] = &allNodes[(gridWidth * (y)) + (x - 1)];
 			}
-			if (x < gridWidth - 1) { //get right node
+			if (x < gridWidth - 1) { // Get right node
 				n.connected[3] = &allNodes[(gridWidth * (y)) + (x + 1)];
 			}
 			for (int i = 0; i < 4; ++i) {
@@ -63,7 +63,7 @@ NavigationGrid::NavigationGrid(const std::string&filename) : NavigationGrid() {
 						n.costs[i]		= 1;
 					}
 					if (n.connected[i]->type == 'x') {
-						n.connected[i] = nullptr; //actually a wall, disconnect!
+						n.connected[i] = nullptr; // Actually a wall, disconnect!
 					}
 				}
 			}

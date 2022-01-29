@@ -72,7 +72,7 @@ CourseworkGame::~CourseworkGame()	{
 }
 
 std::string CourseworkGame::GetTime() {
-	// help from: https://www.py4u.net/discuss/122330
+	// with help from: https://www.py4u.net/discuss/122330
 	using namespace std::chrono;
 
 	std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
@@ -160,10 +160,7 @@ void CourseworkGame::SetGameState(int value) {
 }
 
 void CourseworkGame::UpdateKeys() {
-	//Running certain physics updates in a consistent order might cause some
-	//bias in the calculations - the same objects might keep 'winning' the constraint
-	//allowing the other one to stretch too much etc. Shuffling the order so that it
-	//is random every frame can help reduce such bias.
+	// Shuffling the order of constraints to reduce bias in calculations	
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F9)) {
 		world->ShuffleConstraints(true);
 	}
@@ -188,10 +185,6 @@ void CourseworkGame::LockedObjectMovement() {
 	Matrix4 camWorld	= view.Inverse();
 
 	Vector3 rightAxis = Vector3(camWorld.GetColumn(0)); //view is inverse of model!
-
-	//forward is more tricky -  camera forward is 'into' the screen...
-	//so we can take a guess, and use the cross of straight up, and
-	//the right axis, to hopefully get a vector that's good enough!
 
 	Vector3 fwdAxis = Vector3::Cross(Vector3(0.0f, 1.0f, 0.0f), rightAxis);
 	fwdAxis.y = 0.0f;
@@ -245,8 +238,8 @@ void CourseworkGame::LoadLevel1() {
 
 	// Gameplay ball
 	playerSphere = AddSphereToWorld(Vector3(0.0f, 0.0f, 00.0f), 4, 2);
-	//playerSphere = AddSphereToWorld(Vector3(20.0f, -100.0f, 380.0f), 4.0f, 2.0f); // skip to further back in the world
-	//playerSphere = AddSphereToWorld(Vector3(-180, -152.0f, 380), 4, 2); // skip to further back in the world
+	//playerSphere = AddSphereToWorld(Vector3(20.0f, -100.0f, 380.0f), 4.0f, 2.0f); // skip to further forward in the world
+	//playerSphere = AddSphereToWorld(Vector3(-180, -152.0f, 380), 4, 2); // skip to further forward in the world
 
 	// Starting platforms
 	AddOBBFloorToWorld(Vector3(0.0f, -30.0f, 40.0f), Vector3(20.0f, 0.0f, 0.0f), Vector3(25.0f, 2.0f, 75.0f));
@@ -382,10 +375,12 @@ void CourseworkGame::L2Gameplay(float dt) {
 	renderer->DrawString("Player score: " + std::to_string(playerSphere->GetScore()), Vector2(5.0f, 10.0f), Vector4(0.0f, 1.0f, 0.0f, 1.0f), 25.0f);
 	renderer->DrawString("Enemy score: " + std::to_string(enemySphere->GetScore()), Vector2(55.0f, 10.0f), Vector4(1.0f, 0.0f, 0.0f, 1.0f), 25.0f);
 
-	// Show grid
-	//NavigationGrid grid("Part2NavigationGrid.txt");
-	//grid.DrawMap(renderer);
-	//DisplayPathfinding();
+	// Show the grid to debug
+	/*
+	NavigationGrid grid("Part2NavigationGrid.txt");
+	grid.DrawMap(renderer);
+	DisplayPathfinding();
+	*/
 
 	// Remove coins to be deleted
 	auto it = coins.begin();
@@ -660,14 +655,6 @@ GameObject* CourseworkGame::AddCubeToWorld(const Vector3& position, Vector3 dime
 	return cube;
 }
 
-/*
-
-	Every frame, this code will let you perform a raycast, to see if there's an object
-	underneath the cursor, and if so 'select it' into a pointer, so that it can be 
-	manipulated later. Pressing Q will let you toggle between this behaviour and instead
-	letting you move the camera around. 
-
-*/
 bool CourseworkGame::SelectObject() {
 	if (Window::GetMouse()->ButtonDown(NCL::MouseButtons::LEFT)) {
 		if (selectionObject) {	//set colour to deselected;

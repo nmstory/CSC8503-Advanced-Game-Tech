@@ -10,13 +10,13 @@ namespace NCL {
 			NavigationPath() {}
 			~NavigationPath() {}
 
-			void	Clear() {
+			void Clear() {
 				waypoints.clear();
 			}
-			void	PushWaypoint(const Vector3& wp) {
+			void PushWaypoint(const Vector3& wp) {
 				waypoints.emplace_back(wp);
 			}
-			bool	PopWaypoint(Vector3& waypoint) {
+			bool PopWaypoint(Vector3& waypoint) {
 				if (waypoints.empty()) {
 					return false;
 				}
@@ -26,7 +26,6 @@ namespace NCL {
 			}
 
 		protected:
-
 			std::vector <Vector3> waypoints;
 		};
 	}

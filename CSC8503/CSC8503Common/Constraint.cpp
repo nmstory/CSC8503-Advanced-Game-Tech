@@ -97,8 +97,7 @@ void NCL::CSC8503::BalancingPlaneConstraint::UpdateConstraint(float dt) {
 
 	Vector3 relativePos = balancingPlane->GetTransform().GetPosition() - restingPosition;
 	float currentDistance = relativePos.Length();
-	//			MAX DISTANCE - currentDistance
-	float offset = 30.0f - currentDistance;
+	float offset = maxBalancingBoardDistanceOffset - currentDistance;
 
 	if (abs(offset) > 0.0f) {
 		Vector3 offsetDir = relativePos.Normalised();

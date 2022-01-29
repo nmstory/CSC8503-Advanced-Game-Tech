@@ -132,6 +132,7 @@ namespace NCL {
 				Vector3 restingPosition;
 				Vector3* pushOrientation;
 				bool allowMoveX, allowMoveY, allowMoveZ;
+				float maxBalancingBoardDistanceOffset = 30.0f;
 		};
 	}
 }
