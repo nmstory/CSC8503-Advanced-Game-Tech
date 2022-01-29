@@ -93,11 +93,11 @@ namespace NCL {
 			float elasticity = 0.812f;
 			float friction;
 
-			//linear stuff
+			// Linear stuff
 			Vector3 linearVelocity;
 			Vector3 force;
 			
-			//angular stuff
+			// Angular stuff
 			Vector3 angularVelocity;
 			Vector3 torque;
 			Vector3 inverseInertia;

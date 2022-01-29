@@ -1,7 +1,4 @@
 #pragma once
-
-
-#pragma once
 #include <functional>
 
 namespace NCL {

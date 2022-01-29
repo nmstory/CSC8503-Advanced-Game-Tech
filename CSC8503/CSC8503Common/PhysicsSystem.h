@@ -58,7 +58,7 @@ namespace NCL {
 			Vector3 gravity;
 			float	dTOffset;
 			float	globalDamping;
-			float	linearDamping = 0.4f; // Tutorial 2 Q.2.
+			float	linearDamping = 0.4f;
 
 			std::set<CollisionDetection::CollisionInfo> allCollisions;
 			std::set<CollisionDetection::CollisionInfo> broadphaseCollisions;
@@ -66,7 +66,6 @@ namespace NCL {
 			// new
 			std::set<CollisionDetection::CollisionInfo> dynamicCollisionObject;
 			std::set<CollisionDetection::CollisionInfo> staticCollisionObject;
-
 
 			NCL::CSC8503::QuadTree<GameObject*>* tree;
 

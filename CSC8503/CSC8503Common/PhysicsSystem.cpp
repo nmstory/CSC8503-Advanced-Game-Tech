@@ -12,13 +12,6 @@
 using namespace NCL;
 using namespace CSC8503;
 
-/*
-
-These two variables help define the relationship between positions
-and the forces that are added to objects to change those positions
-
-*/
-
 PhysicsSystem::PhysicsSystem(GameWorld& g) : gameWorld(g) {
 	applyGravity	= false;
 	useBroadPhase	= false;	
@@ -36,23 +29,19 @@ void PhysicsSystem::SetGravity(const Vector3& g) {
 }
 
 /*
-
-If the 'game' is ever reset, the PhysicsSystem must be
-'cleared' to remove any old collisions that might still
-be hanging around in the collision list. If your engine
-is expanded to allow objects to be removed from the world,
-you'll need to iterate through this collisions list to remove
-any collisions they are in.
-
+	If the 'game' is ever reset, the PhysicsSystem must be
+	'cleared' to remove any old collisions that might still
+	be hanging around in the collision list. If your engine
+	is expanded to allow objects to be removed from the world,
+	you'll need to iterate through this collisions list to remove
+	any collisions they are in.
 */
 void PhysicsSystem::Clear() {
 	allCollisions.clear();
 }
 
 /*
-
-This is the core of the physics engine update
-
+	This is the core of the physics engine update
 */
 int constraintIterationCount = 10;
 
@@ -61,10 +50,10 @@ const int   idealHZ = 120;
 const float idealDT = 1.0f / idealHZ;
 
 /*
-This is the fixed update we actually have...
-If physics takes too long it starts to kill the framerate, it'll drop the 
-iteration count down until the FPS stabilises, even if that ends up
-being at a low rate. 
+	This is the fixed update we actually have...
+	If physics takes too long it starts to kill the framerate, it'll drop the 
+	iteration count down until the FPS stabilises, even if that ends up
+	being at a low rate. 
 */
 int realHZ		= idealHZ;
 float realDT	= idealDT;
@@ -83,7 +72,7 @@ void PhysicsSystem::Update(float dt) {
 		std::cout << "Setting constraint iterations to " << constraintIterationCount << std::endl;
 	}
 
-	dTOffset += dt; //We accumulate time delta here - there might be remainders from previous frame!
+	dTOffset += dt; // We accumulate time delta here - there might be remainders from previous frame!
 
 	GameTimer t;
 	t.GetTimeDeltaSeconds();
@@ -93,7 +82,7 @@ void PhysicsSystem::Update(float dt) {
 	}
 
 	while(dTOffset >= realDT) {
-		IntegrateAccel(realDT); //Update accelerations from external forces
+		IntegrateAccel(realDT); // Update accelerations from external forces
 		if (useBroadPhase) {
 			BroadPhase();
 			NarrowPhase(dt);
@@ -102,9 +91,9 @@ void PhysicsSystem::Update(float dt) {
 			BasicCollisionDetection(dt);
 		}
 
-		//This is our simple iterative solver - 
-		//we just run things multiple times, slowly moving things forward
-		//and then rechecking that the constraints have been met		
+		/*	This is our simple iterative solver - 
+			we just run things multiple times, slowly moving things forward
+			and then rechecking that the constraints have been met */	
 		float constraintDt = realDT /  (float)constraintIterationCount;
 		for (int i = 0; i < constraintIterationCount; ++i) {
 			UpdateConstraints(constraintDt);	
@@ -143,15 +132,15 @@ void PhysicsSystem::Update(float dt) {
 }
 
 /*
-Later on we're going to need to keep track of collisions
-across multiple frames, so we store them in a set.
+	Later on we're going to need to keep track of collisions
+	across multiple frames, so we store them in a set.
 
-The first time they are added, we tell the objects they are colliding.
-The frame they are to be removed, we tell them they're no longer colliding.
+	The first time they are added, we tell the objects they are colliding.
+	The frame they are to be removed, we tell them they're no longer colliding.
 
-From this simple mechanism, we we build up gameplay interactions inside the
-OnCollisionBegin / OnCollisionEnd functions (removing health when hit by a 
-rocket launcher, gaining a point when the player hits the gold coin, and so on).
+	From this simple mechanism, we we build up gameplay interactions inside the
+	OnCollisionBegin / OnCollisionEnd functions (removing health when hit by a 
+	rocket launcher, gaining a point when the player hits the gold coin, and so on).
 */
 void PhysicsSystem::UpdateCollisionList() {
 	for (std::set<CollisionDetection::CollisionInfo>::iterator i = allCollisions.begin(); i != allCollisions.end(); ) {
@@ -188,8 +177,8 @@ std::set<CollisionDetection::CollisionInfo>* PhysicsSystem::PotentialCollisionsF
 			CollisionDetection::CollisionInfo info;
 			for (auto i = data.begin(); i != data.end(); ++i) {
 				
-				// perform Raycast stuff in here
-				//if true, add to potentialCollisionsToRay set
+				// perform Raycast functionality in here
+				// if true, add to potentialCollisionsToRay set
 			}
 		}
 	);
@@ -199,13 +188,11 @@ std::set<CollisionDetection::CollisionInfo>* PhysicsSystem::PotentialCollisionsF
 
 
 /*
-
-This is how we'll be doing collision detection in tutorial 4.
-We step thorugh every pair of objects once (the inner for loop offset 
-ensures this), and determine whether they collide, and if so, add them
-to the collision set for later processing. The set will guarantee that
-a particular pair will only be added once, so objects colliding for
-multiple frames won't flood the set with duplicates.
+	We step thorugh every pair of objects once (the inner for loop offset 
+	ensures this), and determine whether they collide, and if so, add them
+	to the collision set for later processing. The set will guarantee that
+	a particular pair will only be added once, so objects colliding for
+	multiple frames won't flood the set with duplicates.
 */
 void PhysicsSystem::BasicCollisionDetection(float dt) {
 	std::vector <GameObject*>::const_iterator first;
@@ -224,7 +211,7 @@ void PhysicsSystem::BasicCollisionDetection(float dt) {
 			CollisionDetection::CollisionInfo info;
 			if (CollisionDetection::ObjectIntersection(*i, *j, info)) {
 				ImpulseResolveCollision(*info.a, *info.b, info.point);
-				//ResolveSpringCollision(*info.a, *info.b, info.point, dt);
+				//ResolveSpringCollision(*info.a, *info.b, info.point, dt); // impulse or spring collision
 				info.framesLeft = numCollisionFrames;
 				allCollisions.insert(info);
 
@@ -305,16 +292,15 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 	if (b.GetName() != "Piston Platform") physB->ApplyAngularImpulse(Vector3::Cross(relativeB, frictionImpulse));
 }
 
-// Tutorial 5 Q.2
 // Collision resolution by changing the object acceleration, rather than their position and velocity
 // Using Hooke's spring calculations to move the objects
 void PhysicsSystem::ResolveSpringCollision(GameObject& a, GameObject& b, CollisionDetection::ContactPoint& p, float dt) const {
 	float springRestingLength = 0.0f; // temporary initial resting length of 0
 	float springCoefficient = 15.0f; // How quickly the spring should snap back to its resting length when stretched or compressed
 
-	// Hooke's law: F = -kx, where the spring force F is the result of the difference is spring length x from the 'resting length'
-	// multiplied by the spring constant k, which represents how snappy the spring is - so the larger the k is, the more force is applied,
-	// and the quicker the spring tries to return to its resting length
+	/* Hooke's law: F = -kx, where the spring force F is the result of the difference is spring length x from the 'resting length'
+		multiplied by the spring constant k, which represents how snappy the spring is - so the larger the k is, the more force is applied,
+		and the quicker the spring tries to return to its resting length */
 
 	PhysicsObject* physA = a.GetPhysicsObject();
 	PhysicsObject* physB = b.GetPhysicsObject();
@@ -334,15 +320,11 @@ void PhysicsSystem::ResolveSpringCollision(GameObject& a, GameObject& b, Collisi
 	physA->ApplyAngularImpulse(Vector3::Cross(p.localA, -forceToApply));
 	physB->ApplyAngularImpulse(Vector3::Cross(p.localB, forceToApply));
 }
+
 /*
-
-Later, we replace the BasicCollisionDetection method with a broadphase
-and a narrowphase collision detection method. In the broad phase, we
-split the world up using an acceleration structure, so that we can only
-compare the collisions that we absolutely need to. 
-
+	Splitting the world up using an acceleration structure for the broadphase, so
+	that we can only compare collisions we absolutely need to.
 */
-
 void PhysicsSystem::BroadPhase() {
 
 	// Constructing a Quadtree with some default parameters, then iterating through all of the objects in the game world and inserting them into the tree
@@ -379,9 +361,8 @@ void PhysicsSystem::BroadPhase() {
 }
 
 /*
-
-The broadphase will now only give us likely collisions, so we can now go through them,
-and work out if they are truly colliding, and if so, add them into the main collision list
+	The broadphase will now only give likely collisions, so we can now go through them,
+	and work out if they are truly colliding, and if so, add them into the main collision list
 */
 void PhysicsSystem::NarrowPhase(float dt) {
 	for (std::set <CollisionDetection::CollisionInfo>::iterator
@@ -402,13 +383,13 @@ void PhysicsSystem::NarrowPhase(float dt) {
 }
 
 /*
-Integration of acceleration and velocity is split up, so that we can
-move objects multiple times during the course of a PhysicsUpdate,
-without worrying about repeated forces accumulating etc. 
+	Integration of acceleration and velocity is split up, so that we can
+	move objects multiple times during the course of a PhysicsUpdate,
+	without worrying about repeated forces accumulating etc. 
 
-This function will update both linear and angular acceleration,
-based on any forces that have been accumulated in the objects during
-the course of the previous game frame.
+	This function will update both linear and angular acceleration,
+	based on any forces that have been accumulated in the objects during
+	the course of the previous game frame.
 */
 void PhysicsSystem::IntegrateAccel(float dt) {
 	std::vector < GameObject* >::const_iterator first;
@@ -449,10 +430,10 @@ void PhysicsSystem::IntegrateAccel(float dt) {
 	}
 }
 /*
-This function integrates linear and angular velocity into
-position and orientation. It may be called multiple times
-throughout a physics update, to slowly move the objects through
-the world, looking for collisions.
+	This function integrates linear and angular velocity into
+	position and orientation. It may be called multiple times
+	throughout a physics update, to slowly move the objects through
+	the world, looking for collisions.
 */
 void PhysicsSystem::IntegrateVelocity(float dt) {
 	std::vector <GameObject*>::const_iterator first;
@@ -496,9 +477,9 @@ void PhysicsSystem::IntegrateVelocity(float dt) {
 }
 
 /*
-Once we're finished with a physics update, we have to
-clear out any accumulated forces, ready to receive new
-ones in the next 'game' frame.
+	Once we're finished with a physics update, we have to
+	clear out any accumulated forces, ready to receive new
+	ones in the next 'game' frame.
 */
 void PhysicsSystem::ClearForces() {
 	gameWorld.OperateOnContents(
@@ -508,13 +489,10 @@ void PhysicsSystem::ClearForces() {
 	);
 }
 
-
 /*
-
-As part of the final physics tutorials, we add in the ability
-to constrain objects based on some extra calculation, allowing
-us to model springs and ropes etc. 
-
+	As part of the final physics tutorials, we add in the ability
+	to constrain objects based on some extra calculation, allowing
+	us to model springs and ropes etc. 
 */
 void PhysicsSystem::UpdateConstraints(float dt) {
 	std::vector<Constraint*>::const_iterator first;

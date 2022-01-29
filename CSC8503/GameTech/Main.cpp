@@ -10,22 +10,28 @@ int main() {
 
 	if (!w->HasInitialised()) {
 		return -1;
-	}	
+	}
+
 	srand(time(0));
 	w->ShowOSPointer(false);
 	w->LockMouseToWindow(true);
 
 	CourseworkGame* g = new CourseworkGame(w);
-	w->GetTimer()->GetTimeDeltaSeconds(); //Clear the timer
+	w->GetTimer()->GetTimeDeltaSeconds(); // Clear the timer
+
 	while (w->UpdateWindow()) {
+
 		float dt = w->GetTimer()->GetTimeDeltaSeconds();
+
 		if (dt > 0.1f) {
 			std::cout << "Skipping large time delta" << std::endl;
-			continue; //must have hit a breakpoint or something to have a 1 second frame time!
+			continue; // Must have hit a breakpoint or something to have a 1 second frame time!
 		}
+
 		if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::PRIOR)) {
 			w->ShowConsole(true);
 		}
+
 		if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NEXT)) {
 			w->ShowConsole(false);
 		}
@@ -38,5 +44,6 @@ int main() {
 
 		g->UpdateGame(dt);
 	}
+
 	Window::DestroyGameWindow();
 }

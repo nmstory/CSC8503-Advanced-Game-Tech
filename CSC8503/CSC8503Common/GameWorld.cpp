@@ -77,7 +77,6 @@ bool GameWorld::Raycast(Ray& r, RayCollision& closestCollision, bool closestObje
 	RayCollision collision;
 
 	// fire ray to find correct quad first
-	// Set means no duplicate objects - where an object could be in multiple quad tree elements
 	//std::set<CollisionDetection::CollisionInfo>* potentialCollisions = PhysicsSystem::PotentialCollisionsFromRay(r);
 	
 	for (auto& i : gameObjects) {
@@ -111,11 +110,6 @@ bool GameWorld::Raycast(Ray& r, RayCollision& closestCollision, bool closestObje
 	}
 	return false;
 }
-
-
-/*
-Constraint Tutorial Stuff
-*/
 
 void GameWorld::AddConstraint(Constraint* c) {
 	constraints.emplace_back(c);
